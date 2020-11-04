@@ -255,11 +255,13 @@ public interface PurchaseRepository extends PagingAndSortingRepository<Purchase,
 ```
 # 주문처리
 http http://order:8080/order qty=10 pizzaId=10
+
 ![image](https://user-images.githubusercontent.com/70673848/98125248-975ad580-1ef7-11eb-9aa2-8c1f95dc9d6f.png)
 
 
 # 주문 상태 확인
 http localhost:8081/orders/1
+
 ![image](https://user-images.githubusercontent.com/70673848/98125455-da1cad80-1ef7-11eb-8c74-bec335853edc.png)
 
 ```
@@ -512,8 +514,11 @@ http localhost:8080/orders     # 모든 주문의 상태가 "배송됨"으로 �
 
 ## CI/CD 설정
 
+![image](https://user-images.githubusercontent.com/70673848/98127099-a6428780-1ef9-11eb-9bda-b770e18224ae.png)
 
-각 구현체들은 각자의 source repository 에 구성되었고, 사용한 CI/CD 플랫폼은 GCP를 사용하였으며, pipeline build script 는 각 프로젝트 폴더 이하에 cloudbuild.yml 에 포함되었다.
+https://github.com/minky48/example-food-delivery/issues/4#issue-736182764
+
+
 
 
 ## 동기식 호출 / 서킷 브레이킹 / 장애격리
