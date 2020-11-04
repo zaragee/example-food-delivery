@@ -1,4 +1,3 @@
-![image](https://user-images.githubusercontent.com/487999/79708354-29074a80-82fa-11ea-80df-0db3962fb453.png)
 
 # 최종조별과제 - 피자주문배달 시스템 
 
@@ -8,7 +7,7 @@
 
 # Table of contents
 
-- [예제 - 음식배달](#---)
+- [최종조별과제 - 피자주문배달시스템](#---)
   - [서비스 시나리오](#서비스-시나리오)
   - [체크포인트](#체크포인트)
   - [분석/설계](#분석설계)
@@ -107,7 +106,7 @@
     - Contract Test :  자동화된 경계 테스트를 통하여 구현 오류나 API 계약위반를 미리 차단 가능한가?
 
 
-# 분석/설
+# 분석/설계
 
 
 ## Event Storming 결과
@@ -206,17 +205,23 @@
 분석/설계 단계에서 도출된 헥사고날 아키텍처에 따라, 각 BC별로 대변되는 마이크로 서비스들을 스프링부트와 파이선으로 구현하였다. 구현한 각 서비스를 로컬에서 실행하는 방법은 아래와 같다 (각자의 포트넘버는 8081 ~ 808n 이다)
 
 ```
-cd app
+cd gateway
 mvn spring-boot:run
 
-cd pay
-mvn spring-boot:run 
+cd order
+mvn spring-boot:run
 
-cd store
-mvn spring-boot:run  
+cd delivery
+mvn spring-boot:run
 
-cd customer
-python policy-handler.py 
+cd coupon
+mvn spring-boot:run
+
+cd payment
+mvn spring-boot:run
+
+cd statusview
+mvn spring-boot:run
 ```
 
 ## DDD 의 적용
@@ -224,21 +229,54 @@ python policy-handler.py
 - 각 서비스내에 도출된 핵심 Aggregate Root 객체를 Entity 로 선언하였다: (예시는 pay 마이크로 서비스). 이때 가능한 현업에서 사용하는 언어 (유비쿼터스 랭귀지)를 그대로 사용하려고 노력했다. 하지만, 일부 구현에 있어서 영문이 아닌 경우는 실행이 불가능한 경우가 있기 때문에 계속 사용할 방법은 아닌것 같다. (Maven pom.xml, Kafka의 topic id, FeignClient 의 서비스 id 등은 한글로 식별자를 사용하는 경우 오류가 발생하는 것을 확인하였다)
 
 ```
-package fooddelivery;
+package pizza;
 
 import javax.persistence.*;
 import org.springframework.beans.BeanUtils;
 import java.util.List;
 
 @Entity
-@Table(name="결제이력_table")
-public class 결제이력 {
+@Table(name="Order_table")
+public class Order {
 
     @Id
     @GeneratedValue(strategy=GenerationType.AUTO)
     private Long id;
-    private String orderId;
-    private Double 금액;
+    private Long pizzaId;
+    // LDH 소스추가 초기값 설정
+    private String orderStatus ="Ordered";
+    private Long qty;
+
+    @PostPersist
+    public void onPostPersist(){
+        Ordered ordered = new Ordered();
+        BeanUtils.copyProperties(this, ordered);
+        ordered.publishAfterCommit();
+
+        //Following code causes dependency to external APIs
+        // it is NOT A GOOD PRACTICE. instead, Event-Policy mapping is recommended.
+
+        pizza.external.Payment payment = new pizza.external.Payment();
+        
+        payment.setOrderId(this.getId());
+        payment.setPaymentStatus("Paid");
+
+        // mappings goes here
+        OrderApplication.applicationContext.getBean(pizza.external.PaymentService.class)
+            .doPayment(payment);
+
+
+    }
+
+    @PostUpdate
+    public void onPostUpdate(){
+        OrderCanceled orderCanceled = new OrderCanceled();
+        BeanUtils.copyProperties(this, orderCanceled);
+        orderCanceled.publishAfterCommit();
+
+
+    }
+
 
     public Long getId() {
         return id;
@@ -247,37 +285,47 @@ public class 결제이력 {
     public void setId(Long id) {
         this.id = id;
     }
-    public String getOrderId() {
-        return orderId;
+    public Long getPizzaId() {
+        return pizzaId;
     }
 
-    public void setOrderId(String orderId) {
-        this.orderId = orderId;
+    public void setPizzaId(Long pizzaId) {
+        this.pizzaId = pizzaId;
     }
-    public Double get금액() {
-        return 금액;
+    public String getOrderStatus() {
+        return orderStatus;
     }
 
-    public void set금액(Double 금액) {
-        this.금액 = 금액;
+    public void setOrderStatus(String orderStatus) {
+        this.orderStatus = orderStatus;
     }
+    public Long getQty() {
+        return qty;
+    }
+
+    public void setQty(Long qty) {
+        this.qty = qty;
+    }
+
 
 }
+
 
 ```
 - Entity Pattern 과 Repository Pattern 을 적용하여 JPA 를 통하여 다양한 데이터소스 유형 (RDB or NoSQL) 에 대한 별도의 처리가 없도록 데이터 접근 어댑터를 자동 생성하기 위하여 Spring Data REST 의 RestRepository 를 적용하였다
 ```
-package fooddelivery;
+package pizza;
 
 import org.springframework.data.repository.PagingAndSortingRepository;
 
-public interface 결제이력Repository extends PagingAndSortingRepository<결제이력, Long>{
+public interface PurchaseRepository extends PagingAndSortingRepository<Purchase, Long>{
+ 
 }
 ```
 - 적용 후 REST API 의 테스트
 ```
 # app 서비스의 주문처리
-http localhost:8081/orders item="통닭"
+http POST localhost:8081/orders id=10 qty=300
 
 # store 서비스의 배달처리
 http localhost:8083/주문처리s orderId=1
@@ -418,8 +466,7 @@ http localhost:8081/orders item=피자 storeId=2   #Success
 
 ## 비동기식 호출 / 시간적 디커플링 / 장애격리 / 최종 (Eventual) 일관성 테스트
 
-
-결제가 이루어진 후에 상점시스템으로 이를 알려주는 행위는 동기식이 아니라 비 동기식으로 처리하여 상점 시스템의 처리를 위하여 결제주문이 블로킹 되지 않아도록 처리한다.
+배달이 이루어진 후에 쿠폰시스템으로 이를 알려주는 행위는 동기식이 아니라 비 동기식으로 처리하여 쿠폰 시스템의 처리를 위하여 주문이 블로킹 되지 않아도록 처리한다.
  
 - 이를 위하여 결제이력에 기록을 남긴 후에 곧바로 결제승인이 되었다는 도메인 이벤트를 카프카로 송출한다(Publish)
  
