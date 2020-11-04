@@ -471,65 +471,73 @@ http localhost:8081/orders item=피자 storeId=2   #Success
 - 이를 위하여 결제이력에 기록을 남긴 후에 곧바로 결제승인이 되었다는 도메인 이벤트를 카프카로 송출한다(Publish)
  
 ```
-package fooddelivery;
+package pizza;
+
+import javax.persistence.*;
+import org.springframework.beans.BeanUtils;
+import java.util.List;
 
 @Entity
-@Table(name="결제이력_table")
-public class 결제이력 {
+@Table(name="Delivery_table")
+public class Delivery {
 
- ...
-    @PrePersist
-    public void onPrePersist(){
-        결제승인됨 결제승인됨 = new 결제승인됨();
-        BeanUtils.copyProperties(this, 결제승인됨);
-        결제승인됨.publish();
+    @Id
+    @GeneratedValue(strategy=GenerationType.AUTO)
+    private Long id;
+    private String deliveryStatus;
+    private Long orderId;
+
+    @PostPersist
+    public void onPostPersist(){
+        Delivered delivered = new Delivered();
+        BeanUtils.copyProperties(this, delivered);
+        delivered.publishAfterCommit();
+
+
     }
-
-}
 ```
-- 상점 서비스에서는 결제승인 이벤트에 대해서 이를 수신하여 자신의 정책을 처리하도록 PolicyHandler 를 구현한다:
+- 결제승인 이벤트에 대해서 이를 수신하여 자신의 정책을 처리하도록 PolicyHandler 를 구현한다:
 
 ```
-package fooddelivery;
+package pizza;
 
-...
+import pizza.config.kafka.KafkaProcessor;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cloud.stream.annotation.StreamListener;
+import org.springframework.messaging.handler.annotation.Payload;
+import org.springframework.stereotype.Service;
 
 @Service
 public class PolicyHandler{
 
-    @StreamListener(KafkaProcessor.INPUT)
-    public void whenever결제승인됨_주문정보받음(@Payload 결제승인됨 결제승인됨){
+    @Autowired
+    CouponRepository CouponRepository;
 
-        if(결제승인됨.isMe()){
-            System.out.println("##### listener 주문정보받음 : " + 결제승인됨.toJson());
-            // 주문 정보를 받았으니, 요리를 슬슬 시작해야지..
-            
+    @StreamListener(KafkaProcessor.INPUT)
+    public void onStringEventListener(@Payload String eventString){
+
+    }
+
+    @StreamListener(KafkaProcessor.INPUT)
+    public void wheneverDelivered_PublishCoupon(@Payload Delivered delivered){
+
+        if(delivered.isMe()){
+
+            Coupon coupon = new Coupon();
+            CouponRepository.save(coupon);
+
+            System.out.println("##### listener PublishCoupon : " + delivered.toJson());
         }
     }
 
 }
 
-```
-실제 구현을 하자면, 카톡 등으로 점주는 노티를 받고, 요리를 마친후, 주문 상태를 UI에 입력할테니, 우선 주문정보를 DB에 받아놓은 후, 이후 처리는 해당 Aggregate 내에서 하면 되겠다.:
-  
-```
-  @Autowired 주문관리Repository 주문관리Repository;
-  
-  @StreamListener(KafkaProcessor.INPUT)
-  public void whenever결제승인됨_주문정보받음(@Payload 결제승인됨 결제승인됨){
-
-      if(결제승인됨.isMe()){
-          카톡전송(" 주문이 왔어요! : " + 결제승인됨.toString(), 주문.getStoreId());
-
-          주문관리 주문 = new 주문관리();
-          주문.setId(결제승인됨.getOrderId());
-          주문관리Repository.save(주문);
-      }
-  }
 
 ```
 
-상점 시스템은 주문/결제와 완전히 분리되어있으며, 이벤트 수신에 따라 처리되기 때문에, 상점시스템이 유지보수로 인해 잠시 내려간 상태라도 주문을 받는데 문제가 없다:
+쿠폰 시스템은 주문/결제와 완전히 분리되어있으며, 이벤트 수신에 따라 처리되기 때문에, 쿠폰 시스템이 유지보수로 인해 잠시 내려간 상태라도 주문을 받는데 문제가 없다:
 ```
 # 상점 서비스 (store) 를 잠시 내려놓음 (ctrl+c)
 
