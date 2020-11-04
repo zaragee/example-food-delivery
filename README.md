@@ -463,6 +463,9 @@ http localhost:8080/orders     # 모든 주문의 상태가 "배송됨"으로 �
 ![image](https://user-images.githubusercontent.com/70673848/98133397-e3f6de80-1f00-11eb-9576-5b3ac711f0c4.png)
 
 
+## gateway 적용
+!@작업필요
+
 # 운영
 
 ## CI/CD 설정
@@ -548,6 +551,7 @@ kubectl get deploy pay -w
 !@8
 
 - siege 의 로그를 보아도 전체적인 성공률이 높아진 것을 확인 할 수 있다. 
+!@ 확인필요
 ```
 ![image](https://user-images.githubusercontent.com/70673848/98128628-77c5ac00-1efb-11eb-9b45-8dbdbf340980.png)
 
@@ -603,4 +607,3 @@ http get방식에서 tcp방식으로 변경, 서비스포트 8080이 아닌 고�
 ## Configmap
 
 
-## gateway 적용
