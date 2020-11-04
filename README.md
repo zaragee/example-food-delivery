@@ -255,87 +255,34 @@ public interface PurchaseRepository extends PagingAndSortingRepository<Purchase,
 ```
 # 주문처리
 http http://order:8080/order qty=10 pizzaId=10
+```
 
 ![image](https://user-images.githubusercontent.com/70673848/98125248-975ad580-1ef7-11eb-9aa2-8c1f95dc9d6f.png)
 
-
+```
 # 주문 상태 확인
 http localhost:8081/orders/1
-
-![image](https://user-images.githubusercontent.com/70673848/98125455-da1cad80-1ef7-11eb-8c74-bec335853edc.png)
-
 ```
-
+![image](https://user-images.githubusercontent.com/70673848/98125455-da1cad80-1ef7-11eb-8c74-bec335853edc.png)
 
 ## 폴리글랏 퍼시스턴스
 !@ 작업필요
 
-앱프런트 (app) 는 서비스 특성상 많은 사용자의 유입과 상품 정보의 다양한 콘텐츠를 저장해야 하는 특징으로 인해 RDB 보다는 Document DB / NoSQL 계열의 데이터베이스인 Mongo DB 를 사용하기로 하였다. 이를 위해 order 의 선언에는 @Entity 가 아닌 @Document 로 마킹되었으며, 별다른 작업없이 기존의 Entity Pattern 과 Repository Pattern 적용과 데이터베이스 제품의 설정 (application.yml) 만으로 MongoDB 에 부착시켰다
+H2가 아닌 Derby in-memory DB를 사용함
 
 ```
-# Order.java
+<dependency>
+    <groupId>org.hsqldb</groupId>
+    <artifactId>hsqldb</artifactId>
+    <version>2.4.0</version>
+    <scope>runtime</scope>
+</dependency>
 
-package fooddelivery;
-
-@Document
-public class Order {
-
-    private String id; // mongo db 적용시엔 id 는 고정값으로 key가 자동 발급되는 필드기 때문에 @Id 나 @GeneratedValue 를 주지 않아도 된다.
-    private String item;
-    private Integer 수량;
-
-}
-
-
-# 주문Repository.java
-package fooddelivery;
-
-public interface 주문Repository extends JpaRepository<Order, UUID>{
-}
-
-# application.yml
-
-  data:
-    mongodb:
-      host: mongodb.default.svc.cluster.local
-    database: mongo-example
 
 ```
 
-## 폴리글랏 프로그래밍
-!@ 
+![image](https://user-images.githubusercontent.com/70673848/98131259-734ec280-1efe-11eb-9ba0-663579f02f57.png)
 
-고객관리 서비스(customer)의 시나리오인 주문상태, 배달상태 변경에 따라 고객에게 카톡메시지 보내는 기능의 구현 파트는 해당 팀이 python 을 이용하여 구현하기로 하였다. 해당 파이썬 구현체는 각 이벤트를 수신하여 처리하는 Kafka consumer 로 구현되었고 코드는 다음과 같다:
-```
-from flask import Flask
-from redis import Redis, RedisError
-from kafka import KafkaConsumer
-import os
-import socket
-
-
-# To consume latest messages and auto-commit offsets
-consumer = KafkaConsumer('fooddelivery',
-                         group_id='',
-                         bootstrap_servers=['localhost:9092'])
-for message in consumer:
-    print ("%s:%d:%d: key=%s value=%s" % (message.topic, message.partition,
-                                          message.offset, message.key,
-                                          message.value))
-
-    # 카톡호출 API
-```
-
-파이선 애플리케이션을 컴파일하고 실행하기 위한 도커파일은 아래와 같다 (운영단계에서 할일인가? 아니다 여기 까지가 개발자가 할일이다. Immutable Image):
-```
-FROM python:2.7-slim
-WORKDIR /app
-ADD . /app
-RUN pip install --trusted-host pypi.python.org -r requirements.txt
-ENV NAME World
-EXPOSE 8090
-CMD ["python", "policy-handler.py"]
-```
 
 
 ## 동기식 호출 과 Fallback 처리
@@ -505,10 +452,11 @@ http localhost:8080/orders     # 모든 주문의 상태가 "배송됨"으로 �
 ```
 
 ## CQRS 적용
-!@그림필요
+![image](https://user-images.githubusercontent.com/70673848/98130658-d9871580-1efd-11eb-9447-0175789ca9f1.png)
 
-## CQRS 적용
-!@그림필요
+
+![image](https://user-images.githubusercontent.com/70673848/98130748-ef94d600-1efd-11eb-83f6-6acad31ce584.png)
+
 
 # 운영
 
