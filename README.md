@@ -303,7 +303,7 @@ public interface 주문Repository extends JpaRepository<Order, UUID>{
 ```
 
 ## 폴리글랏 프로그래밍
-!@
+!@ 
 
 고객관리 서비스(customer)의 시나리오인 주문상태, 배달상태 변경에 따라 고객에게 카톡메시지 보내는 기능의 구현 파트는 해당 팀이 python 을 이용하여 구현하기로 하였다. 해당 파이썬 구현체는 각 이벤트를 수신하여 처리하는 Kafka consumer 로 구현되었고 코드는 다음과 같다:
 ```
@@ -646,3 +646,9 @@ http get방식에서 tcp방식으로 변경, 서비스포트 8080이 아닌 고�
 !@ 포트변경 화면 필요 
 
 ![image](https://user-images.githubusercontent.com/70673848/98129462-7d6fc180-1efc-11eb-9d79-a651ee57d3db.png)
+
+
+## Configmap
+
+
+## gateway 적용
