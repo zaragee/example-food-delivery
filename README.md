@@ -311,7 +311,7 @@ public class Order {
 
 
 }
-
+!@ 1번슬라이드
 
 ```
 - Entity Pattern 과 Repository Pattern 을 적용하여 JPA 를 통하여 다양한 데이터소스 유형 (RDB or NoSQL) 에 대한 별도의 처리가 없도록 데이터 접근 어댑터를 자동 생성하기 위하여 Spring Data REST 의 RestRepository 를 적용하였다
@@ -747,6 +747,7 @@ Shortest transaction:	        0.00
 - Availability 가 높아진 것을 확인 (siege)
 
 ### 오토스케일 아웃
+!@7번 hpa설정확인
 앞서 CB 는 시스템을 안정되게 운영할 수 있게 해줬지만 사용자의 요청을 100% 받아들여주지 못했기 때문에 이에 대한 보완책으로 자동화된 확장 기능을 적용하고자 한다. 
 
 
@@ -764,6 +765,9 @@ kubectl get deploy pay -w
 ```
 - 어느정도 시간이 흐른 후 (약 30초) 스케일 아웃이 벌어지는 것을 확인할 수 있다:
 ```
+!@8
+
+
 NAME    DESIRED   CURRENT   UP-TO-DATE   AVAILABLE   AGE
 pay     1         1         1            1           17s
 pay     1         2         1            1           45s
@@ -783,8 +787,10 @@ Concurrency:		       96.02
 ```
 
 
-## 무정지 재배포
 
+
+## 무정지 재배포
+!@9 
 * 먼저 무정지 재배포가 100% 되는 것인지 확인하기 위해서 Autoscaler 이나 CB 설정을 제거함
 
 - seige 로 배포작업 직전에 워크로드를 모니터링 함.
