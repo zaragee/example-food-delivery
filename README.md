@@ -639,5 +639,10 @@ kubectl apply -f kubernetes/deployment.yaml
 
 배포기간 동안 Availability 가 변화없기 때문에 무정지 재배포가 성공한 것으로 확인됨.
 
-## 무정지 재배포
+## Livness구현
 
+- POINT의 depolyment.yaml 소스설정
+http get방식에서 tcp방식으로 변경, 서비스포트 8080이 아닌 고의로 8081로 포트 변경하여
+!@ 포트변경 화면 필요 
+
+![image](https://user-images.githubusercontent.com/70673848/98129462-7d6fc180-1efc-11eb-9d79-a651ee57d3db.png)
