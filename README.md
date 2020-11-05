@@ -440,18 +440,18 @@ public class PolicyHandler{
 쿠폰 시스템은 배송서비스와 완전히 분리되어있으며, 이벤트 수신에 따라 처리되기 때문에, 쿠폰 시스템이 유지보수로 인해 잠시 내려간 상태라도 주문을 받는데 문제가 없다:
 !@ 
 
-```
+
 
 ![image](https://user-images.githubusercontent.com/70673848/98187965-7b861c80-1f55-11eb-8ce1-4ec6798e50df.png)
 ![image](https://user-images.githubusercontent.com/70673848/98187975-7de87680-1f55-11eb-8a1f-35e74d86a864.png)
 ```
-쿠폰 서비 를 잠시 내려놓음 
+쿠폰 서버 를 잠시 내려놓음 
 ```
 ![image](https://user-images.githubusercontent.com/70673848/98187982-817bfd80-1f55-11eb-946c-3fea9417de92.png)
 
 ```
-배송 서비스 재기동
-cd delivery
+쿠폰 서비스 재기동
+cd coupon
 mvn spring-boot:run
 
 모든 주문의 상태가 "배송됨"으로 확인
