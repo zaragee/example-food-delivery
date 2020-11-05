@@ -341,14 +341,16 @@ public interface PaymentService {
 
 ```
 # 배송 (delivery) 서비스를 잠시 내려놓음
+```
 
 ![image](https://user-images.githubusercontent.com/70673841/98238113-41df0100-1fa9-11eb-88db-59dcb9be0640.png)
 
-
-# 이벤트 등록 처리
-http localhost:8081/orders pizzaId=1 qty=1   #Fail
 ```
-![image](https://user-images.githubusercontent.com/70673848/98130658-d9871580-1efd-11eb-9447-0175789ca9f1.png)
+# 이벤트 등록 처리
+http POST http://localhost:8086/events eventKind="Christmas" eventStatus="EventStarted" giftId=1   #Fail
+```
+![image](https://user-images.githubusercontent.com/70673841/98238735-3213ec80-1faa-11eb-95cc-c229c14740fa.png)
+
 ```
 #결제서비스 재기동
 cd payment
