@@ -277,7 +277,8 @@ http http://localhost:8086/events/2
 
 ## 폴리글랏 퍼시스턴스
 
-H2가 아닌 Derby in-memory DB를 사용함
+H2가 아닌 hsqldb in-memory DB를 사용함
+event pom.xml 파일에서 아래 hsqldb 관련 아래 dependency 추가
 
 ```
 <dependency>
@@ -288,8 +289,7 @@ H2가 아닌 Derby in-memory DB를 사용함
 </dependency>
 ```
 
-![image](https://user-images.githubusercontent.com/70673848/98189149-b38e5f00-1f57-11eb-9017-15370565c091.png)
-
+![image](https://user-images.githubusercontent.com/70673841/98234603-0beb4e00-1fa4-11eb-8938-f45cc354f9f2.png)
 
 
 ## 동기식 호출 과 Fallback 처리
