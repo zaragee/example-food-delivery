@@ -298,7 +298,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 
 import java.util.Date;
 
-@FeignClient(name="payment", url="${api.url.payment}")
+@FeignClient(name="payment", url="http://localhost:8082")
 public interface PaymentService {
 
     @RequestMapping(method= RequestMethod.POST, path="/payments")
@@ -332,9 +332,7 @@ public interface PaymentService {
 # 결제 (payment) 서비스를 잠시 내려놓음 (ctrl+c)
 
 #주문처리
-http localhost:8081/orders id=10 qty=10   #Fail
-
-http localhost:8081/orders item=피자 storeId=2   #Fail
+http localhost:8081/orders pizzaId=1 qty=1   #Fail
 ```
 ![image](https://user-images.githubusercontent.com/70673848/98130658-d9871580-1efd-11eb-9447-0175789ca9f1.png)
 ```
@@ -343,8 +341,7 @@ cd payment
 mvn spring-boot:run
 
 #주문처리
-http localhost:8081/orders pizzaId=1 qty=10   #Success
-http localhost:8081/orders pizzaId=2 qty=20   #Success
+http localhost:8081/orders pizzaId=1 qty=1   #Success
 ```
 ![image](https://user-images.githubusercontent.com/70673848/98130748-ef94d600-1efd-11eb-83f6-6acad31ce584.png)
 
