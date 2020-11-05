@@ -446,6 +446,8 @@ public class PolicyHandler{
 쿠폰 서버 를 잠시 내려놓음 
 ```
 ![image](https://user-images.githubusercontent.com/70673848/98187982-817bfd80-1f55-11eb-946c-3fea9417de92.png)
+![image](https://user-images.githubusercontent.com/70673848/98187989-83de5780-1f55-11eb-9b3a-1e678cf63948.png)
+![image](https://user-images.githubusercontent.com/70673848/98187993-86d94800-1f55-11eb-8976-d6aabbe0d48e.png)
 
 ```
 쿠폰 서비스 재기동
@@ -454,9 +456,6 @@ mvn spring-boot:run
 
 모든 주문의 상태가 "배송됨"으로 확인
 ```
-
-![image](https://user-images.githubusercontent.com/70673848/98187989-83de5780-1f55-11eb-9b3a-1e678cf63948.png)
-![image](https://user-images.githubusercontent.com/70673848/98187993-86d94800-1f55-11eb-8976-d6aabbe0d48e.png)
 ![image](https://user-images.githubusercontent.com/70673848/98188001-89d43880-1f55-11eb-95a9-00a556648bb1.png)
 
 
