@@ -113,7 +113,9 @@
 
  도메인 서열 분리 
     - Core Domain:  order,  delivery : 핵심 서비스이며, 연간 Up-time SLA 수준을 99.999% 목표, 배포주기는 request의 경우 1주일 1회 미만, delivery의 경우 1개월 1회 미만
+    
     - Supporting Domain:   statusview, coupon : 경쟁력을 내기위한 서비스이며, SLA 수준은 연간 60% 이상 uptime 목표, 배포주기는 각 팀의 자율이나 표준 스프린트 주기가 1주일 이므로 1주일 1회 이상을 기준으로 함.
+    
     - General Domain:   Payment : 결제서비스로 3rd Party 외부 서비스를 사용하는 것이 경쟁력이 높음 (핑크색으로 이후 전환할 예정)
 
 
@@ -131,7 +133,7 @@
 
 # 구현:
 !@ 작성
-분석/설계 단계에서 도출된 헥사고날 아키텍처에 따라, 각 BC별로 대변되는 마이크로 서비스들을 스프링부트와 파이선으로 구현하였다. 구현한 각 서비스를 로컬에서 실행하는 방법은 아래와 같다 (각자의 포트넘버는 8081 ~ 808n 이다)
+분석/설계 단계에서 도출된 헥사고날 아키텍처에 따라, 각 BC별로 대변되는 마이크로 서비스들을 스프링부트와 파이선으로 구현하였다. 구현한 각 서비스를 로컬에서 실행하는 방법은 아래와 같다 (각자의 포트넘버는 8081 ~ 8085이다)
 
 ```
 cd order
@@ -433,33 +435,35 @@ public class PolicyHandler{
 ```
 
 쿠폰 시스템은 배송서비스와 완전히 분리되어있으며, 이벤트 수신에 따라 처리되기 때문에, 쿠폰 시스템이 유지보수로 인해 잠시 내려간 상태라도 주문을 받는데 문제가 없다:
-!@ 작성필요 그림필요
+!@ 
 
 ```
-# 상점 서비스 (store) 를 잠시 내려놓음 (ctrl+c)
 
-#주문처리
-http localhost:8081/orders item=통닭 storeId=1   #Success
-http localhost:8081/orders item=피자 storeId=2   #Success
-
-#주문상태 확인
-http localhost:8080/orders     # 주문상태 안바뀜 확인
-
-#상점 서비스 기동
-cd 상점
+![image](https://user-images.githubusercontent.com/70673848/98187965-7b861c80-1f55-11eb-8ce1-4ec6798e50df.png)
+![image](https://user-images.githubusercontent.com/70673848/98187975-7de87680-1f55-11eb-8a1f-35e74d86a864.png)
+```
+# 쿠폰 서비 를 잠시 내려놓음 
+```
+![image](https://user-images.githubusercontent.com/70673848/98187982-817bfd80-1f55-11eb-946c-3fea9417de92.png)
+```
+# 배송 서비스 재기동
+cd delivery
 mvn spring-boot:run
 
-#주문상태 확인
-http localhost:8080/orders     # 모든 주문의 상태가 "배송됨"으로 확인
+모든 주문의 상태가 "배송됨"으로 확인
 ```
+![image](https://user-images.githubusercontent.com/70673848/98187989-83de5780-1f55-11eb-9b3a-1e678cf63948.png)
+![image](https://user-images.githubusercontent.com/70673848/98187993-86d94800-1f55-11eb-8976-d6aabbe0d48e.png)
+![image](https://user-images.githubusercontent.com/70673848/98188001-89d43880-1f55-11eb-95a9-00a556648bb1.png)
+
 
 ## CQRS 적용
-
-![image](https://user-images.githubusercontent.com/70673848/98133365-d8a3b300-1f00-11eb-9d98-65cb337cc926.png)
 
 ![image](https://user-images.githubusercontent.com/70673848/98133383-df322a80-1f00-11eb-84ec-86c79e322f64.png)
 
 ![image](https://user-images.githubusercontent.com/70673848/98133397-e3f6de80-1f00-11eb-9576-5b3ac711f0c4.png)
+
+![image](https://user-images.githubusercontent.com/70673848/98133365-d8a3b300-1f00-11eb-9d98-65cb337cc926.png)
 
 
 ## gateway 적용
@@ -557,9 +561,9 @@ kubectl get deploy pay -w
 !@8
 
 - siege 의 로그를 보아도 전체적인 성공률이 높아진 것을 확인 할 수 있다. 
-!@ 확인필요
+!@ 
 ```
-![image](https://user-images.githubusercontent.com/70673848/98128628-77c5ac00-1efb-11eb-9b45-8dbdbf340980.png)
+![image](https://user-images.githubusercontent.com/70673848/98187606-ad4ab380-1f54-11eb-8bb6-8d791f5f3090.png)
 
 
 
