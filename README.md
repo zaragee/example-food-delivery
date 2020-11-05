@@ -461,9 +461,15 @@ mvn spring-boot:run
 
 ## CQRS 적용
 
+order의 처리  
+
 ![image](https://user-images.githubusercontent.com/70673848/98133383-df322a80-1f00-11eb-84ec-86c79e322f64.png)
 
+delivery의 처리 결과 
+
 ![image](https://user-images.githubusercontent.com/70673848/98133397-e3f6de80-1f00-11eb-9576-5b3ac711f0c4.png)
+
+주문현황을 VIEW로 구현
 
 ![image](https://user-images.githubusercontent.com/70673848/98133365-d8a3b300-1f00-11eb-9d98-65cb337cc926.png)
 
