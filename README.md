@@ -263,17 +263,17 @@ public interface PurchaseRepository extends PagingAndSortingRepository<Purchase,
 ```
 - 적용 후 REST API 의 테스트
 ```
-# 주문처리
-http http://order:8080/order qty=10 pizzaId=10
+# 이벤트 등록 처리
+http POST http://localhost:8086/events eventKind="Christmas" eventStatus="EventStarted" giftId=1
 ```
 
-![image](https://user-images.githubusercontent.com/70673848/98125248-975ad580-1ef7-11eb-9aa2-8c1f95dc9d6f.png)
+![image](https://user-images.githubusercontent.com/70673841/98233300-30462b00-1fa2-11eb-8a1b-a8f2fbeac087.png)
 
 ```
-# 주문 상태 확인
-http localhost:8081/orders/1
+# 이벤트 등록 결과 확인
+http http://localhost:8086/events/2
 ```
-![image](https://user-images.githubusercontent.com/70673848/98125455-da1cad80-1ef7-11eb-8c74-bec335853edc.png)
+![image](https://user-images.githubusercontent.com/70673841/98233403-58358e80-1fa2-11eb-83fe-dc811e6ea25f.png)
 
 ## 폴리글랏 퍼시스턴스
 
