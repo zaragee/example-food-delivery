@@ -510,10 +510,9 @@ hystrix:
       execution.isolation.thread.timeoutInMilliseconds: 500
 
 ```
-
-- 피호출 서비스(결제:pay) 의 임의 부하 처리 - 400 밀리에서 증감 220 밀리 정도 왔다갔다 하게
+- 피호출 서비스 pament onPostPersist영역의 부하코드 추가 - 400 밀리에서 증감 220 밀리 정도 왔다갔다 하게
 ```
-# (payment) 결제이력.java (Entity)
+# payment.java (Entity)
 
     @PostPersist
     public void onPostPersist(){
