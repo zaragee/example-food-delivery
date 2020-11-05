@@ -464,6 +464,8 @@ delivery의 처리 결과
 ## gateway 적용
 
 application.yaml파일에 소스 적용
+
+
 ![image](https://user-images.githubusercontent.com/70673848/98185841-ccdfdd00-1f50-11eb-8566-10ac8d20791f.png)
 
 호출확인
