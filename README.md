@@ -464,9 +464,11 @@ http localhost:8080/orders     # 모든 주문의 상태가 "배송됨"으로 �
 
 ## gateway 적용
 소스적용
+
 ![image](https://user-images.githubusercontent.com/70673848/98185841-ccdfdd00-1f50-11eb-8566-10ac8d20791f.png)
 
 호출확인
+
 ![image](https://user-images.githubusercontent.com/70673848/98185850-cfdacd80-1f50-11eb-8bdb-66e0c4e59169.png)
 
 # 운영
