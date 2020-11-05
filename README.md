@@ -331,10 +331,10 @@ public interface PaymentService {
 
 - 동기식 호출에서는 호출 시간에 따른 타임 커플링이 발생하며, 결제 시스템이 장애가 나면 주문도 못받는다는 것을 확인:
 
-![image](https://user-images.githubusercontent.com/70673848/98130658-d9871580-1efd-11eb-9447-0175789ca9f1.png)
 
 
-![image](https://user-images.githubusercontent.com/70673848/98130748-ef94d600-1efd-11eb-83f6-6acad31ce584.png)
+
+
 
 
 ```
@@ -344,7 +344,9 @@ public interface PaymentService {
 http localhost:8081/orders id=10 qty=10   #Fail
 
 http localhost:8081/orders item=피자 storeId=2   #Fail
-
+```
+![image](https://user-images.githubusercontent.com/70673848/98130658-d9871580-1efd-11eb-9447-0175789ca9f1.png)
+```
 #결제서비스 재기동
 !@ 확인필요
 cd 결제
@@ -354,6 +356,7 @@ mvn spring-boot:run
 http localhost:8081/orders id=1 qty=10   #Success
 http localhost:8081/orders id=2 qty=20   #Success
 ```
+![image](https://user-images.githubusercontent.com/70673848/98130748-ef94d600-1efd-11eb-83f6-6acad31ce584.png)
 
 - 또한 과도한 요청시에 서비스 장애가 도미노 처럼 벌어질 수 있다. (서킷브레이커, 폴백 처리는 운영단계에서 설명한다.)
 
@@ -442,16 +445,18 @@ public class PolicyHandler{
 ![image](https://user-images.githubusercontent.com/70673848/98187965-7b861c80-1f55-11eb-8ce1-4ec6798e50df.png)
 ![image](https://user-images.githubusercontent.com/70673848/98187975-7de87680-1f55-11eb-8a1f-35e74d86a864.png)
 ```
-# 쿠폰 서비 를 잠시 내려놓음 
+쿠폰 서비 를 잠시 내려놓음 
 ```
 ![image](https://user-images.githubusercontent.com/70673848/98187982-817bfd80-1f55-11eb-946c-3fea9417de92.png)
+
 ```
-# 배송 서비스 재기동
+배송 서비스 재기동
 cd delivery
 mvn spring-boot:run
 
 모든 주문의 상태가 "배송됨"으로 확인
 ```
+
 ![image](https://user-images.githubusercontent.com/70673848/98187989-83de5780-1f55-11eb-9b3a-1e678cf63948.png)
 ![image](https://user-images.githubusercontent.com/70673848/98187993-86d94800-1f55-11eb-8976-d6aabbe0d48e.png)
 ![image](https://user-images.githubusercontent.com/70673848/98188001-89d43880-1f55-11eb-95a9-00a556648bb1.png)
