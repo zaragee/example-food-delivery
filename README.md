@@ -538,7 +538,7 @@ kubectl autoscale deploy pay --min=1 --max=10 --cpu-percent=15
 
 - CB 에서 했던 방식대로 워크로드를 2분 동안 걸어준다.
 ```
-siege -c100 -t120S -r10 --content-type "application/json" 'http://localhost:8081/orders POST {"piaazaId": 1}'
+siege -c100 -t120S -r10 --content-type "application/json" 'http://localhost:8081/orders POST {"pizzaId":1,"qty":2}
 
 ```
 - 오토스케일이 어떻게 되고 있는지 모니터링을 걸어둔다:
