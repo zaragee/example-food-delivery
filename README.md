@@ -528,7 +528,7 @@ hystrix:
     }
 ```
 
-![image](https://user-images.githubusercontent.com/70673848/98127976-aabb7000-1efa-11eb-8e89-3dccb8dc64ba.png)
+![image](https://user-images.githubusercontent.com/70673848/98189992-6e6b2c80-1f59-11eb-9851-9fa3380fa05d.png)
 
 -운영시스템은 죽지 않고 지속적으로 CB 에 의하여 적절히 회로가 열림과 닫힘이 벌어지면서 자원을 보호하고 있음을 보여줌. 
 72% 가 성공하였고, 고객 사용성에 있어 좋지 않기 때문에 28%를 커버하기위하여  Retry 설정과 동적 Scale out (replica의 자동적 추가,HPA) 을 통하여 시스템을 확장 해주는 후속처리가 필요.
