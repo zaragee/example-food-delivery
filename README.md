@@ -330,11 +330,6 @@ public interface PaymentService {
 - 동기식 호출에서는 호출 시간에 따른 타임 커플링이 발생하며, 결제 시스템이 장애가 나면 주문도 못받는다는 것을 확인:
 
 
-
-
-
-
-
 ```
 # 결제 (pay) 서비스를 잠시 내려놓음 (ctrl+c)
 
@@ -346,13 +341,12 @@ http localhost:8081/orders item=피자 storeId=2   #Fail
 ![image](https://user-images.githubusercontent.com/70673848/98130658-d9871580-1efd-11eb-9447-0175789ca9f1.png)
 ```
 #결제서비스 재기동
-!@ 확인필요
-cd 결제
+cd payment
 mvn spring-boot:run
 
 #주문처리
-http localhost:8081/orders id=1 qty=10   #Success
-http localhost:8081/orders id=2 qty=20   #Success
+http localhost:8081/orders pizzaId=1 qty=10   #Success
+http localhost:8081/orders pizzaId=2 qty=20   #Success
 ```
 ![image](https://user-images.githubusercontent.com/70673848/98130748-ef94d600-1efd-11eb-83f6-6acad31ce584.png)
 
