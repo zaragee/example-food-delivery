@@ -22,10 +22,8 @@
     - [동기식 호출 / 서킷 브레이킹 / 장애격리](#동기식-호출-서킷-브레이킹-장애격리)
     - [오토스케일 아웃](#오토스케일-아웃)
     - [무정지 재배포](#무정지-재배포)
-  - [신규 개발 조직의 추가](#신규-개발-조직의-추가)
 
 # 서비스 시나리오
-!@작성 
 
 기능적 요구사항
 1. 고객이 피자종류와 수량을 주문한다.
@@ -112,9 +110,11 @@
 ![image](https://user-images.githubusercontent.com/70673848/98124211-3a125480-1ef6-11eb-8c3a-e73d38cbad33.png)
 
  도메인 서열 분리 
+   
     - Core Domain:  order,  delivery : 핵심 서비스이며, 연간 Up-time SLA 수준을 99.999% 목표, 배포주기는 request의 경우 1주일 1회 미만, delivery의 경우 1개월 1회 미만
     
-    - Supporting Domain:   statusview, coupon : 경쟁력을 내기위한 서비스이며, SLA 수준은 연간 60% 이상 uptime 목표, 배포주기는 각 팀의 자율이나 표준 스프린트 주기가 1주일 이므로 1주일 1회 이상을 기준으로 함.
+    - Supporting Domain:   statusview, coupon : 경쟁력을 내기위한 서비스이며, SLA 수준은 연간 60% 이상 uptime 목표, 
+                                                배포주기는 각 팀의 자율이나 표준 스프린트 주기가 1주일 이므로 1주일 1회 이상을 기준으로 함.
     
     - General Domain:   Payment : 결제서비스로 3rd Party 외부 서비스를 사용하는 것이 경쟁력이 높음 (핑크색으로 이후 전환할 예정)
 
@@ -122,7 +122,6 @@
 
 ## 헥사고날 아키텍처 다이어그램 도출
 
-!@
 
 ![image](https://user-images.githubusercontent.com/70673848/98185027-1fb89500-1f4f-11eb-82c8-c194f6aa7ded.png)
 
@@ -132,7 +131,7 @@
 
 
 # 구현:
-!@ 작성
+
 분석/설계 단계에서 도출된 헥사고날 아키텍처에 따라, 각 BC별로 대변되는 마이크로 서비스들을 스프링부트와 파이선으로 구현하였다. 구현한 각 서비스를 로컬에서 실행하는 방법은 아래와 같다 (각자의 포트넘버는 8081 ~ 8085이다)
 
 ```
@@ -154,7 +153,7 @@ mvn spring-boot:run
 ```
 
 ## DDD 의 적용
-!@ 
+
 - 각 서비스내에 도출된 핵심 Aggregate Root 객체를 Entity 로 선언하였다: (예시는 pay 마이크로 서비스). 이때 가능한 현업에서 사용하는 언어 (유비쿼터스 랭귀지)를 그대로 사용하려고 노력했다. 하지만, 일부 구현에 있어서 영문이 아닌 경우는 실행이 불가능한 경우가 있기 때문에 계속 사용할 방법은 아닌것 같다. (Maven pom.xml, Kafka의 topic id, FeignClient 의 서비스 id 등은 한글로 식별자를 사용하는 경우 오류가 발생하는 것을 확인하였다)
 
 ```
@@ -265,7 +264,6 @@ http localhost:8081/orders/1
 ![image](https://user-images.githubusercontent.com/70673848/98125455-da1cad80-1ef7-11eb-8c74-bec335853edc.png)
 
 ## 폴리글랏 퍼시스턴스
-!@ 작업필요
 
 H2가 아닌 Derby in-memory DB를 사용함
 
@@ -284,7 +282,7 @@ H2가 아닌 Derby in-memory DB를 사용함
 
 ## 동기식 호출 과 Fallback 처리
 
-분석단계에서의 조건 중 하나로 주문(order)->결제(pay) 간의 호출은 동기식 일관성을 유지하는 트랜잭션으로 처리하기로 하였다. 호출 프로토콜은 이미 앞서 Rest Repository 에 의해 노출되어있는 REST 서비스를 FeignClient 를 이용하여 호출하도록 한다. 
+분석단계에서의 조건 중 하나로 주문(order)->결제(payment) 간의 호출은 동기식 일관성을 유지하는 트랜잭션으로 처리하기로 하였다. 호출 프로토콜은 이미 앞서 Rest Repository 에 의해 노출되어있는 REST 서비스를 FeignClient 를 이용하여 호출하도록 한다. 
 
 - 결제서비스를 호출하기 위하여 Stub과 (FeignClient) 를 이용하여 Service 대행 인터페이스 (Proxy) 를 구현 
 
@@ -331,7 +329,7 @@ public interface PaymentService {
 
 
 ```
-# 결제 (pay) 서비스를 잠시 내려놓음 (ctrl+c)
+# 결제 (payment) 서비스를 잠시 내려놓음 (ctrl+c)
 
 #주문처리
 http localhost:8081/orders id=10 qty=10   #Fail
@@ -356,11 +354,10 @@ http localhost:8081/orders pizzaId=2 qty=20   #Success
 
 
 ## 비동기식 호출 / 시간적 디커플링 / 장애격리 / 최종 (Eventual) 일관성 테스트
-!@
 
 배달이 이루어진 후에 쿠폰시스템으로 이를 알려주는 행위는 동기식이 아니라 비 동기식으로 처리하여 쿠폰 시스템의 처리를 위하여 주문이 블로킹 되지 않아도록 처리한다.
  
-- 이를 위하여 매달이력에 기록을 남긴 후에 곧바로 쿠폰이 발행 되었다는 도메인 이벤트를 카프카로 송출한다(Publish)
+- 이를 위하여 배달이력에 기록을 남긴 후에 곧바로 쿠폰이 발행 되었다는 도메인 이벤트를 카프카로 송출한다(Publish)
  
 ```
 package pizza;
@@ -430,14 +427,13 @@ public class PolicyHandler{
 ```
 
 쿠폰 시스템은 배송서비스와 완전히 분리되어있으며, 이벤트 수신에 따라 처리되기 때문에, 쿠폰 시스템이 유지보수로 인해 잠시 내려간 상태라도 주문을 받는데 문제가 없다:
-!@ 
 
 
 
 ![image](https://user-images.githubusercontent.com/70673848/98187965-7b861c80-1f55-11eb-8ce1-4ec6798e50df.png)
 ![image](https://user-images.githubusercontent.com/70673848/98187975-7de87680-1f55-11eb-8a1f-35e74d86a864.png)
 ```
-쿠폰 서버 를 잠시 내려놓음 
+쿠폰 서비스를 잠시 내려놓음 
 ```
 ![image](https://user-images.githubusercontent.com/70673848/98187982-817bfd80-1f55-11eb-946c-3fea9417de92.png)
 ![image](https://user-images.githubusercontent.com/70673848/98187989-83de5780-1f55-11eb-9b3a-1e678cf63948.png)
@@ -455,7 +451,7 @@ mvn spring-boot:run
 
 ## CQRS 적용
 
-order의 처리  
+order의 처리 결과
 
 ![image](https://user-images.githubusercontent.com/70673848/98133383-df322a80-1f00-11eb-84ec-86c79e322f64.png)
 
@@ -469,8 +465,8 @@ delivery의 처리 결과
 
 
 ## gateway 적용
-소스적용
 
+application.yaml파일에 소스 적용
 ![image](https://user-images.githubusercontent.com/70673848/98185841-ccdfdd00-1f50-11eb-8566-10ac8d20791f.png)
 
 호출확인
@@ -533,10 +529,9 @@ hystrix:
 -운영시스템은 죽지 않고 지속적으로 CB 에 의하여 적절히 회로가 열림과 닫힘이 벌어지면서 자원을 보호하고 있음을 보여줌. 
 72% 가 성공하였고, 고객 사용성에 있어 좋지 않기 때문에 28%를 커버하기위하여  Retry 설정과 동적 Scale out (replica의 자동적 추가,HPA) 을 통하여 시스템을 확장 해주는 후속처리가 필요.
 
-Availability 가 높아진 것을 확인 (siege)
 
 ### 오토스케일 아웃
-!@7번 hpa설정확인
+
 앞서 CB 는 시스템을 안정되게 운영할 수 있게 해줬지만 사용자의 요청을 100% 받아들여주지 못했기 때문에 이에 대한 보완책으로 자동화된 확장 기능을 적용하고자 한다. 
 
 
@@ -553,30 +548,26 @@ siege -c100 -t120S -r10 --content-type "application/json" 'http://localhost:8081
 ```
 - 오토스케일이 어떻게 되고 있는지 모니터링을 걸어둔다:
 ```
-kubectl get deploy pay -w
+kubectl get deploy payment -w
 ```
 - 어느정도 시간이 흐른 후 (약 30초) 스케일 아웃이 벌어지는 것을 확인할 수 있다:
 ![image](https://user-images.githubusercontent.com/70673848/98128628-77c5ac00-1efb-11eb-9b45-8dbdbf340980.png)
 
 ```
-!@8
-
 - siege 의 로그를 보아도 전체적인 성공률이 높아진 것을 확인 할 수 있다. 
-!@ 
+
 ```
 ![image](https://user-images.githubusercontent.com/70673848/98187606-ad4ab380-1f54-11eb-8bb6-8d791f5f3090.png)
 
 
 
-
-
 ## 무정지 재배포
-!@9 
+
 * 먼저 무정지 재배포가 100% 되는 것인지 확인하기 위해서 Autoscaler 이나 CB 설정을 제거함
 
 - seige 로 배포작업 직전에 워크로드를 모니터링 함.
 ```
-siege -c100 -t120S -r10 --content-type "application/json" 'http://localhost:8081/orders POST {"id":10, "qty":10}'
+siege -c100 -t120S -r10 --content-type "application/json" 'http://localhost:8081/orders POST {"pizzaId":10, "qty":10}'
 
 ```
 
@@ -610,11 +601,11 @@ kubectl apply -f kubernetes/deployment.yaml
 
 - POINT의 depolyment.yaml 소스설정
 http get방식에서 tcp방식으로 변경, 서비스포트 8080이 아닌 고의로 8081로 포트 변경하여
-!@ 포트변경 화면 필요 
+
 
 ![image](https://user-images.githubusercontent.com/70673848/98129462-7d6fc180-1efc-11eb-9d79-a651ee57d3db.png)
 
 
-## Configmap
+
 
 
