@@ -554,31 +554,32 @@ hystrix:
 앞서 CB 는 시스템을 안정되게 운영할 수 있게 해줬지만 사용자의 요청을 100% 받아들여주지 못했기 때문에 이에 대한 보완책으로 자동화된 확장 기능을 적용하고자 한다. 
 
 - Delivery deployment.yml 파일에 resource 설정을 추가
+
 ![image](https://user-images.githubusercontent.com/70673841/98318745-8f4b8480-2022-11eb-8b0b-0c5ca8890904.png)
 
 - 배송서비스에 대한 replica 를 동적으로 늘려주도록 HPA 를 설정한다. 설정은 CPU 사용량이 15프로를 넘어서면 replica 를 10개까지 늘려준다:
 ```
-kubectl autoscale deploy pay --min=1 --max=10 --cpu-percent=15
+kubectl autoscale deploy delivery --min=1 --max=10 --cpu-percent=15
 ```
-![image](https://user-images.githubusercontent.com/70673848/98128510-5cf33780-1efb-11eb-8f1d-56e3eacb5d6a.png)
+![image](https://user-images.githubusercontent.com/70673841/98320263-f0288c00-2025-11eb-88fb-97f2dec2d431.png)
 
 - CB 에서 했던 방식대로 워크로드를 2분 동안 걸어준다.
 ```
-siege -c100 -t120S -r10 --content-type "application/json" 'http://localhost:8081/orders POST {"pizzaId":1,"qty":2}
+siege -c100 -t120S -r10 -v --content-type "application/json" 'http://event:8080/events POST {"eventKind": "Christmas", "eventStatus": "EventStarted", "giftId": 10}'
 
 ```
 - 오토스케일이 어떻게 되고 있는지 모니터링을 걸어둔다:
 ```
-kubectl get deploy payment -w
+kubectl get deploy delivery -w
 ```
 - 어느정도 시간이 흐른 후 (약 30초) 스케일 아웃이 벌어지는 것을 확인할 수 있다:
-![image](https://user-images.githubusercontent.com/70673848/98128628-77c5ac00-1efb-11eb-9b45-8dbdbf340980.png)
+![image](https://user-images.githubusercontent.com/70673841/98320372-26660b80-2026-11eb-8956-ad9f59086372.png)
 
 ```
 - siege 의 로그를 보아도 전체적인 성공률이 높아진 것을 확인 할 수 있다. 
 
 ```
-![image](https://user-images.githubusercontent.com/70673848/98187606-ad4ab380-1f54-11eb-8bb6-8d791f5f3090.png)
+![image](https://user-images.githubusercontent.com/70673841/98320401-3847ae80-2026-11eb-87a5-c502c5deee2f.png)
 
 
 
