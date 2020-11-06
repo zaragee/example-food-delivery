@@ -529,13 +529,9 @@ http http://localhost:8085/statusViews
 ## CI/CD 설정
 각 구현체들은 각자의 source repository 에 구성되었고, 사용한 CI/CD 플랫폼은 Azure를 사용하였으며, pipeline build script 는 각 프로젝트 폴더 이하에 deployment.yml, service.yml 에 포함되었다.
 
-![image](https://user-images.githubusercontent.com/70673848/98127099-a6428780-1ef9-11eb-9bda-b770e18224ae.png)
+![image](https://user-images.githubusercontent.com/70673841/98330724-5ae5c180-203e-11eb-8b98-b5dd4179416b.png)
 
-![image](https://user-images.githubusercontent.com/70673848/98127386-ff122000-1ef9-11eb-8cf4-eb0692915a9e.png)
-
-![image](https://user-images.githubusercontent.com/70673848/98127453-1224f000-1efa-11eb-8e85-bbf578a71189.png)
-
-![image](https://user-images.githubusercontent.com/70673848/98127526-2832b080-1efa-11eb-92d5-e5237bb17d83.png)
+![image](https://user-images.githubusercontent.com/70673841/98330744-66d18380-203e-11eb-853e-369bfd7fe6c5.png)
 
 
 ## 동기식 호출 / 서킷 브레이킹 / 장애격리
@@ -573,7 +569,7 @@ hystrix:
 
 //        hystix test
         try {
-            Thread.sleep((long) (400 + Math.random() * 300));
+            Thread.sleep((long) (400 + Math.random() * 220));
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
