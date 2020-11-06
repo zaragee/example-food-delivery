@@ -522,7 +522,7 @@ http http://localhost:8085/statusViews
 
 - 호출확인
 
-![image](https://user-images.githubusercontent.com/70673848/98185850-cfdacd80-1f50-11eb-8bdb-66e0c4e59169.png)
+![image](https://user-images.githubusercontent.com/70673841/98331445-eb70d180-203f-11eb-94d0-eca4fee081dc.png)
 
 # 운영
 
@@ -640,7 +640,7 @@ kubectl set image ...
 
 
 
-배포기간중 Availability 가 평소 100%에서 90% 대로 떨어지는 것을 확인. 원인은 쿠버네티스가 성급하게 새로 올려진 서비스를 READY 상태로 인식하여 서비스 유입을 진행한 것이기 때문. 이를 막기위해 Readiness Probe 를 설정함:
+배포기간중 Availability 가 평소 100%에서 98.34%로 떨어지는 것을 확인. 원인은 쿠버네티스가 성급하게 새로 올려진 서비스를 READY 상태로 인식하여 서비스 유입을 진행한 것이기 때문. 이를 막기위해 Readiness Probe 를 설정함:
 
 ```
 # deployment.yaml 의 readiness probe 의 설정:
