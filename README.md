@@ -476,36 +476,41 @@ public class PolicyHandler{
 배송 서비스를 잠시 내려놓음 
 ```
 
-![image](https://user-images.githubusercontent.com/70673841/98329292-418f4600-203b-11eb-8474-d87ff4a7e040.png)
-![image](https://user-images.githubusercontent.com/70673841/98329304-494eea80-203b-11eb-9bb0-a7b91a3261fe.png)
-
+![image](https://user-images.githubusercontent.com/70673841/98329347-61266e80-203b-11eb-9ccc-3b82e835af91.png)
+![image](https://user-images.githubusercontent.com/70673841/98329354-6388c880-203b-11eb-89c0-523e727cd3ff.png)
 
 ```
 배달 서비스 재기동
 cd delivery
 mvn spring-boot:run
-
 배달 서비스 재기동 후 정상 동작함
 ```
 
-![image](https://user-images.githubusercontent.com/70673841/98329347-61266e80-203b-11eb-9ccc-3b82e835af91.png)
-![image](https://user-images.githubusercontent.com/70673841/98329354-6388c880-203b-11eb-89c0-523e727cd3ff.png)
 ![image](https://user-images.githubusercontent.com/70673841/98329356-65eb2280-203b-11eb-81b2-e2d0ac658eac.png)
 
 
 ## CQRS 적용
 
-order의 처리 결과
+- Event의 처리 결과
+```
+http http://localhost:8086/events/2
+```
 
-![image](https://user-images.githubusercontent.com/70673848/98133383-df322a80-1f00-11eb-84ec-86c79e322f64.png)
+![image](https://user-images.githubusercontent.com/70673841/98329834-73ed7300-203c-11eb-8b8b-6cfd4145409a.png)
 
-delivery의 처리 결과 
+- Order의 처리 결과 
+```
+http http://localhost:8081/orders/10
+```
+![image](https://user-images.githubusercontent.com/70673841/98329846-7780fa00-203c-11eb-914c-23e13706c4b2.png)
 
-![image](https://user-images.githubusercontent.com/70673848/98133397-e3f6de80-1f00-11eb-9576-5b3ac711f0c4.png)
+- 현황화면을 VIEW로 구현
+```
+http http://localhost:8085/statusViews
+```
+![image](https://user-images.githubusercontent.com/70673841/98329851-79e35400-203c-11eb-89cc-170af21a66a7.png)
 
-주문현황을 VIEW로 구현
 
-![image](https://user-images.githubusercontent.com/70673848/98133365-d8a3b300-1f00-11eb-9d98-65cb337cc926.png)
 
 
 ## gateway 적용
