@@ -515,12 +515,12 @@ http http://localhost:8085/statusViews
 
 ## gateway 적용
 
-application.yaml파일에 소스 적용
+- gateway application.yaml파일
 
 
 ![image](https://user-images.githubusercontent.com/70673848/98185841-ccdfdd00-1f50-11eb-8566-10ac8d20791f.png)
 
-호출확인
+- 호출확인
 
 ![image](https://user-images.githubusercontent.com/70673848/98185850-cfdacd80-1f50-11eb-8bdb-66e0c4e59169.png)
 
