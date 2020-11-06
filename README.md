@@ -352,14 +352,14 @@ http POST http://localhost:8086/events eventKind="Christmas" eventStatus="EventS
 ![image](https://user-images.githubusercontent.com/70673841/98238735-3213ec80-1faa-11eb-95cc-c229c14740fa.png)
 
 ```
-#결제서비스 재기동
-cd payment
+# 배송 서비스 재기동
+cd delivery
 mvn spring-boot:run
 
-#주문처리
-http localhost:8081/orders pizzaId=1 qty=1   #Success
+# 이벤트 등록 처리
+http POST http://localhost:8086/events eventKind="Christmas" eventStatus="EventStarted" giftId=1   #Success
 ```
-![image](https://user-images.githubusercontent.com/70673848/98130748-ef94d600-1efd-11eb-83f6-6acad31ce584.png)
+![image](https://user-images.githubusercontent.com/70673841/98313776-eef06280-2017-11eb-81a2-65d5006f468b.png)
 
 - 또한 과도한 요청시에 서비스 장애가 도미노 처럼 벌어질 수 있다. (서킷브레이커, 폴백 처리는 운영단계에서 설명한다.)
 
