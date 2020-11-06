@@ -553,7 +553,7 @@ hystrix:
       execution.isolation.thread.timeoutInMilliseconds: 500
 
 ```
-- 피호출 서비스 Delivery onPostPersist영역의 부하코드 추가 - 400 밀리에서 증감 220 밀리 정도 왔다갔다 하게
+- 피호출 서비스 Delivery onPostPersist영역의 부하코드 추가 - 400 밀리에서 증감 220 밀리 정도 왔다갔다 하게 처리
 ```
 # delivery.java (Entity)
 
@@ -575,10 +575,14 @@ hystrix:
         }
 ```
 
-![image](https://user-images.githubusercontent.com/70673848/98189992-6e6b2c80-1f59-11eb-9851-9fa3380fa05d.png)
+```
+siege -c1 -t10S -r1 -v --content-type "application/json" 'http://event:8080/events POST {"eventKind": "Christmas", "eventStatus": "EventStarted", "giftId": 10}'
+```
+
+![image](https://user-images.githubusercontent.com/70673841/98330744-66d18380-203e-11eb-853e-369bfd7fe6c5.png)
 
 -운영시스템은 죽지 않고 지속적으로 CB 에 의하여 적절히 회로가 열림과 닫힘이 벌어지면서 자원을 보호하고 있음을 보여줌. 
-72% 가 성공하였고, 고객 사용성에 있어 좋지 않기 때문에 28%를 커버하기위하여  Retry 설정과 동적 Scale out (replica의 자동적 추가,HPA) 을 통하여 시스템을 확장 해주는 후속처리가 필요.
+31.25% 가 성공하였고, 고객 사용성에 있어 좋지 않기 때문에 나머지를 커버하기위하여  Retry 설정과 동적 Scale out (replica의 자동적 추가,HPA) 을 통하여 시스템을 확장 해주는 후속처리가 필요.
 
 
 ### 오토스케일 아웃
