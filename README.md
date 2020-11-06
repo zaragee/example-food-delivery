@@ -586,7 +586,7 @@ kubectl get deploy delivery -w
 
 - seige 로 배포작업 직전에 워크로드를 모니터링 함.
 ```
-siege -c100 -t120S -r10 --content-type "application/json" 'http://localhost:8081/orders POST {"pizzaId":10, "qty":10}'
+siege -c100 -t300S -r10 -v --content-type "application/json" 'http://event:8080/events POST {"eventKind": "Christmas", "eventStatus": "EventStarted", "giftId": 10}'
 
 ```
 
@@ -597,7 +597,7 @@ kubectl set image ...
 
 - seige 의 화면으로 넘어가서 Availability 가 100% 미만으로 떨어졌는지 확인
 
-![image](https://user-images.githubusercontent.com/70673848/98135259-f6721780-1f02-11eb-99b9-e8bac256177d.png)
+![image](https://user-images.githubusercontent.com/70673841/98326978-e27b0280-2035-11eb-96b6-8a94610f107d.png)
 
 
 
@@ -611,7 +611,7 @@ kubectl apply -f kubernetes/deployment.yaml
 
 - 동일한 시나리오로 재배포 한 후 Availability 확인:
 
-![image](https://user-images.githubusercontent.com/70673848/98135292-fffb7f80-1f02-11eb-876e-937a98b39f91.png)
+![image](https://user-images.githubusercontent.com/70673841/98327052-076f7580-2036-11eb-96e5-46116b36cf51.png)
 
 
 배포기간 동안 Availability 가 변화없기 때문에 무정지 재배포가 성공한 것으로 확인됨.
