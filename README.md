@@ -295,9 +295,9 @@ event pom.xml 파일에서 아래 hsqldb 관련 아래 dependency 추가
 - 결제서비스를 호출하기 위하여 Stub과 (FeignClient) 를 이용하여 Service 대행 인터페이스 (Proxy) 를 구현 
 
 ```
-# (payment) PaymentService.java
+# (event) DeliveryService.java
 
-package takbaeyo.external;
+package pizza.external;
 
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -306,31 +306,39 @@ import org.springframework.web.bind.annotation.RequestMethod;
 
 import java.util.Date;
 
-@FeignClient(name="payment", url="http://localhost:8082")
-public interface PaymentService {
+//@FeignClient(name="delivery", url="http://delivery:8080")
+@FeignClient(name="delivery", url="http://localhost:8083")
+public interface DeliveryService {
 
-    @RequestMapping(method= RequestMethod.POST, path="/payments")
-    public void dopay(@RequestBody Payment payment);
+    @RequestMapping(method= RequestMethod.POST, path="/deliveries")
+    public void addGift(@RequestBody Delivery delivery);
 
 }
 ```
 
-- 주문을 받은 직후(@PostPersist) 결제를 요청하도록 처리
+- 이벤트를 받은 직후(@PostPersist) 배송 서비스에 요청하도록 처리
 ```
-# order.java (Entity)
-   @PostPersist
+# Event.java (Entity)
+    @PostPersist
     public void onPostPersist(){
-        Ordered ordered = new Ordered();
-        BeanUtils.copyProperties(this, ordered);
-        ordered.publishAfterCommit();
+        EventStarted eventStarted = new EventStarted();
+        BeanUtils.copyProperties(this, eventStarted);
+        eventStarted.publishAfterCommit();
 
-        pizza.external.Payment payment = new pizza.external.Payment();
+        //Following code causes dependency to external APIs
+        // it is NOT A GOOD PRACTICE. instead, Event-Policy mapping is recommended.
 
-        payment.setOrderId(this.getId());
-        payment.setPaymentStatus("Paid");
+        pizza.external.Delivery delivery = new pizza.external.Delivery();
+        delivery.setEventId(this.getId());
+        delivery.setEventStatus("EventStarted");
+        delivery.setDeliveryStatus("Delivered");
+        delivery.setOrderId(Long.valueOf(10));
+        // mappings goes here
+        EventApplication.applicationContext.getBean(pizza.external.DeliveryService.class)
+            .addGift(delivery);
 
-        OrderApplication.applicationContext.getBean(pizza.external.PaymentService.class)
-        .doPayment(payment);
+
+    }
 ```
 
 - 동기식 호출에서는 호출 시간에 따른 타임 커플링이 발생하며, 결제 시스템이 장애가 나면 주문도 못받는다는 것을 확인:
@@ -365,9 +373,9 @@ http POST http://localhost:8086/events eventKind="Christmas" eventStatus="EventS
 
 ## 비동기식 호출 / 시간적 디커플링 / 장애격리 / 최종 (Eventual) 일관성 테스트
 
-배달이 이루어진 후에 쿠폰시스템으로 이를 알려주는 행위는 동기식이 아니라 비 동기식으로 처리하여 쿠폰 시스템의 처리를 위하여 주문이 블로킹 되지 않아도록 처리한다.
+이벤트 중지가 이루어진 후에 배송시스템으로 이를 알려주는 행위는 동기식이 아니라 비 동기식으로 처리하여 배송시스템의 처리를 위하여 이벤트중지가 블로킹 되지 않아도록 처리한다.
  
-- 이를 위하여 배달이력에 기록을 남긴 후에 곧바로 쿠폰이 발행 되었다는 도메인 이벤트를 카프카로 송출한다(Publish)
+- 이를 위하여 이벤트 중지 이력에 기록을 남긴 후에 곧바로 배송 서비스가 처리 되었다는 도메인 이벤트를 카프카로 송출한다(Publish)
  
 ```
 package pizza;
@@ -377,42 +385,51 @@ import org.springframework.beans.BeanUtils;
 import java.util.List;
 
 @Entity
-@Table(name="Delivery_table")
-public class Delivery {
+@Table(name="Event_table")
+public class Event {
 
     @Id
     @GeneratedValue(strategy=GenerationType.AUTO)
     private Long id;
-    private String deliveryStatus;
-    private Long orderId;
+    private String eventStatus="Waiting";
+    private String eventKind;
+    private Long giftId;
 
     @PostPersist
     public void onPostPersist(){
-        Delivered delivered = new Delivered();
-        BeanUtils.copyProperties(this, delivered);
-        delivered.publishAfterCommit();
+        EventStarted eventStarted = new EventStarted();
+        BeanUtils.copyProperties(this, eventStarted);
+        eventStarted.publishAfterCommit();
 
+        //Following code causes dependency to external APIs
+        // it is NOT A GOOD PRACTICE. instead, Event-Policy mapping is recommended.
 
+        pizza.external.Delivery delivery = new pizza.external.Delivery();
+        delivery.setEventId(this.getId());
+        delivery.setEventStatus("EventStarted");
+        delivery.setDeliveryStatus("Delivered");
+        delivery.setOrderId(Long.valueOf(10));
+        // mappings goes here
+        EventApplication.applicationContext.getBean(pizza.external.DeliveryService.class)
+            .addGift(delivery);
+    }
+
+    @PostUpdate
+    public void onPostUpdate(){
+        StoppedEvent stoppedEvent = new StoppedEvent();
+        BeanUtils.copyProperties(this, stoppedEvent);
+        stoppedEvent.publishAfterCommit();
     }
 ```
-- 배달완료 이벤트에 대해서 이를 수신하여 자신의 정책을 처리하도록 PolicyHandler 를 구현한다:
+- 이벤트 완료에 대해서 이를 수신하여 자신의 정책을 처리하도록 PolicyHandler 를 구현한다:
 
 ```
-package pizza;
-
-import pizza.config.kafka.KafkaProcessor;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cloud.stream.annotation.StreamListener;
-import org.springframework.messaging.handler.annotation.Payload;
-import org.springframework.stereotype.Service;
-
 @Service
 public class PolicyHandler{
 
+    //LDH
     @Autowired
-    CouponRepository CouponRepository;
+    DeliveryRepository deliveryRepository;
 
     @StreamListener(KafkaProcessor.INPUT)
     public void onStringEventListener(@Payload String eventString){
@@ -420,23 +437,39 @@ public class PolicyHandler{
     }
 
     @StreamListener(KafkaProcessor.INPUT)
-    public void wheneverDelivered_PublishCoupon(@Payload Delivered delivered){
+    public void wheneverPaid_RequestDelivery(@Payload Paid paid){
 
-        if(delivered.isMe()){
+        if(paid.isMe()){
 
-            Coupon coupon = new Coupon();
-            CouponRepository.save(coupon);
+            //LDH
+            Delivery delivery = new Delivery();
+            delivery.setOrderId(paid.getOrderId());
+            delivery.setDeliveryStatus("Delivered");
+            delivery.setEventId(Long.valueOf(10));
+            delivery.setEventStatus("Waiting");
 
-            System.out.println("##### listener PublishCoupon : " + delivered.toJson());
+            deliveryRepository.save(delivery);
+
+            System.out.println("##### listener RequestDelivery : " + paid.toJson());
         }
     }
+    @StreamListener(KafkaProcessor.INPUT)
+    public void wheneverStoppedEvent_StopGift(@Payload StoppedEvent stoppedEvent){
 
-}
+        if(stoppedEvent.isMe()){
 
+            Delivery delivery = new Delivery();
+            delivery.setDeliveryStatus("Delivered");
+            delivery.setEventId(stoppedEvent.getId());
+            delivery.setEventStatus("StoppedEvent");
 
+            deliveryRepository.save(delivery);
+            System.out.println("##### listener StopGift : " + stoppedEvent.toJson());
+        }
+    }
 ```
 
-쿠폰 시스템은 배송서비스와 완전히 분리되어있으며, 이벤트 수신에 따라 처리되기 때문에, 쿠폰 시스템이 유지보수로 인해 잠시 내려간 상태라도 주문을 받는데 문제가 없다:
+배송 시스템은 이벤트 서비스와 완전히 분리되어있으며, 이벤트 수신에 따라 처리되기 때문에, 배송 시스템이 유지보수로 인해 잠시 내려간 상태라도 이벤트를 받는데 문제가 없다:
 
 
 
