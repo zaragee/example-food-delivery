@@ -292,7 +292,7 @@ event pom.xml 파일에서 아래 hsqldb 관련 아래 dependency 추가
 
 분석단계에서의 조건 중 하나로 이벤트(event)-> 배송(delivery) 간의 호출은 동기식 일관성을 유지하는 트랜잭션으로 처리하기로 하였다. 호출 프로토콜은 이미 앞서 Rest Repository 에 의해 노출되어있는 REST 서비스를 FeignClient 를 이용하여 호출하도록 한다. 
 
-- 결제서비스를 호출하기 위하여 Stub과 (FeignClient) 를 이용하여 Service 대행 인터페이스 (Proxy) 를 구현 
+- 배송서비스를 호출하기 위하여 Stub과 (FeignClient) 를 이용하여 Service 대행 인터페이스 (Proxy) 를 구현 
 
 ```
 # (event) DeliveryService.java
@@ -469,27 +469,28 @@ public class PolicyHandler{
     }
 ```
 
-배송 시스템은 이벤트 서비스와 완전히 분리되어있으며, 이벤트 수신에 따라 처리되기 때문에, 배송 시스템이 유지보수로 인해 잠시 내려간 상태라도 이벤트를 받는데 문제가 없다:
-
-
-
-![image](https://user-images.githubusercontent.com/70673848/98187965-7b861c80-1f55-11eb-8ce1-4ec6798e50df.png)
-![image](https://user-images.githubusercontent.com/70673848/98187975-7de87680-1f55-11eb-8a1f-35e74d86a864.png)
-```
-쿠폰 서비스를 잠시 내려놓음 
-```
-![image](https://user-images.githubusercontent.com/70673848/98187982-817bfd80-1f55-11eb-946c-3fea9417de92.png)
-![image](https://user-images.githubusercontent.com/70673848/98187989-83de5780-1f55-11eb-9b3a-1e678cf63948.png)
-![image](https://user-images.githubusercontent.com/70673848/98187993-86d94800-1f55-11eb-8976-d6aabbe0d48e.png)
+배송 시스템은 이벤트 서비스와 완전히 분리되어있으며, 이벤트 수신에 따라 처리되기 때문에, 배송 시스템이 유지보수로 인해 잠시 내려간 상태라도 이벤트를 받는데 문제가 없다
+배송 서비스를 내려도 이벤트 서비스는 동작함
 
 ```
-쿠폰 서비스 재기동
-cd coupon
+배송 서비스를 잠시 내려놓음 
+```
+
+![image](https://user-images.githubusercontent.com/70673841/98329292-418f4600-203b-11eb-8474-d87ff4a7e040.png)
+![image](https://user-images.githubusercontent.com/70673841/98329304-494eea80-203b-11eb-9bb0-a7b91a3261fe.png)
+
+
+```
+배달 서비스 재기동
+cd delivery
 mvn spring-boot:run
 
-모든 주문의 상태가 "배송됨"으로 확인
+배달 서비스 재기동 후 정상 동작함
 ```
-![image](https://user-images.githubusercontent.com/70673848/98188001-89d43880-1f55-11eb-95a9-00a556648bb1.png)
+
+![image](https://user-images.githubusercontent.com/70673841/98329347-61266e80-203b-11eb-9ccc-3b82e835af91.png)
+![image](https://user-images.githubusercontent.com/70673841/98329354-6388c880-203b-11eb-89c0-523e727cd3ff.png)
+![image](https://user-images.githubusercontent.com/70673841/98329356-65eb2280-203b-11eb-81b2-e2d0ac658eac.png)
 
 
 ## CQRS 적용
