@@ -114,13 +114,14 @@
 # 분석/설계
     
 ### 이벤트 도출
-* MSAEz 로 모델링한 이벤트스토밍 결과:  http://www.msaez.io/#/storming/ZTi9sAEiJxRHIn5xXAA2Lkn9KNV2/mine/de3fac4ae58d3699a80eb8ac15eabe8c/-MLCf4nI9XHFhdCI2DhE
+* MSAEz 로 모델링한 이벤트스토밍 결과:  http://www.msaez.io/#/storming/ZTi9sAEiJxRHIn5xXAA2Lkn9KNV2/mine/de3fac4ae58d3699a80eb8ac15eabe8c/-MLL2HLvAyzesrcb_wl_
 
-![image](https://user-images.githubusercontent.com/70673848/98124211-3a125480-1ef6-11eb-8c3a-e73d38cbad33.png)
+![image](https://user-images.githubusercontent.com/70673841/98326435-9aa7ab80-2034-11eb-87ae-8088ac92c58f.png)
+
 
  도메인 서열 분리 
    
-    - Core Domain:  order,  delivery : 핵심 서비스이며, 연간 Up-time SLA 수준을 99.999% 목표, 배포주기는 request의 경우 1주일 1회 미만, delivery의 경우 1개월 1회 미만
+    - Core Domain:  order,  delivery, event : 핵심 서비스이며, 연간 Up-time SLA 수준을 99.999% 목표, 배포주기는 request의 경우 1주일 1회 미만, delivery의 경우 1개월 1회 미만
     
     - Supporting Domain:   statusview, coupon : 경쟁력을 내기위한 서비스이며, SLA 수준은 연간 60% 이상 uptime 목표, 
                                                 배포주기는 각 팀의 자율이나 표준 스프린트 주기가 1주일 이므로 1주일 1회 이상을 기준으로 함.
@@ -175,43 +176,40 @@ import org.springframework.beans.BeanUtils;
 import java.util.List;
 
 @Entity
-@Table(name="Order_table")
-public class Order {
+@Table(name="Event_table")
+public class Event {
 
     @Id
     @GeneratedValue(strategy=GenerationType.AUTO)
     private Long id;
-    private Long pizzaId;
-    // LDH 소스추가 초기값 설정
-    private String orderStatus ="Ordered";
-    private Long qty;
+    private String eventStatus="Waiting";
+    private String eventKind;
+    private Long giftId;
 
     @PostPersist
     public void onPostPersist(){
-        Ordered ordered = new Ordered();
-        BeanUtils.copyProperties(this, ordered);
-        ordered.publishAfterCommit();
+        EventStarted eventStarted = new EventStarted();
+        BeanUtils.copyProperties(this, eventStarted);
+        eventStarted.publishAfterCommit();
 
         //Following code causes dependency to external APIs
         // it is NOT A GOOD PRACTICE. instead, Event-Policy mapping is recommended.
 
-        pizza.external.Payment payment = new pizza.external.Payment();
-        
-        payment.setOrderId(this.getId());
-        payment.setPaymentStatus("Paid");
-
+        pizza.external.Delivery delivery = new pizza.external.Delivery();
+        delivery.setEventId(this.getId());
+        delivery.setEventStatus("EventStarted");
+        delivery.setDeliveryStatus("Delivered");
+        delivery.setOrderId(Long.valueOf(10));
         // mappings goes here
-        OrderApplication.applicationContext.getBean(pizza.external.PaymentService.class)
-            .doPayment(payment);
-
-
+        EventApplication.applicationContext.getBean(pizza.external.DeliveryService.class)
+            .addGift(delivery);
     }
 
     @PostUpdate
     public void onPostUpdate(){
-        OrderCanceled orderCanceled = new OrderCanceled();
-        BeanUtils.copyProperties(this, orderCanceled);
-        orderCanceled.publishAfterCommit();
+        StoppedEvent stoppedEvent = new StoppedEvent();
+        BeanUtils.copyProperties(this, stoppedEvent);
+        stoppedEvent.publishAfterCommit();
 
 
     }
@@ -224,30 +222,29 @@ public class Order {
     public void setId(Long id) {
         this.id = id;
     }
-    public Long getPizzaId() {
-        return pizzaId;
+    public String getEventStatus() {
+        return eventStatus;
     }
 
-    public void setPizzaId(Long pizzaId) {
-        this.pizzaId = pizzaId;
+    public void setEventStatus(String eventStatus) {
+        this.eventStatus = eventStatus;
     }
-    public String getOrderStatus() {
-        return orderStatus;
-    }
-
-    public void setOrderStatus(String orderStatus) {
-        this.orderStatus = orderStatus;
-    }
-    public Long getQty() {
-        return qty;
+    public String getEventKind() {
+        return eventKind;
     }
 
-    public void setQty(Long qty) {
-        this.qty = qty;
+    public void setEventKind(String eventKind) {
+        this.eventKind = eventKind;
+    }
+    public Long getGiftId() {
+        return giftId;
     }
 
-
+    public void setGiftId(Long giftId) {
+        this.giftId = giftId;
+    }
 }
+
 
 ```
 - Entity Pattern 과 Repository Pattern 을 적용하여 JPA 를 통하여 다양한 데이터소스 유형 (RDB or NoSQL) 에 대한 별도의 처리가 없도록 데이터 접근 어댑터를 자동 생성하기 위하여 Spring Data REST 의 RestRepository 를 적용하였다
